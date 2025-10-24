@@ -1,0 +1,86 @@
+-- CREATE TABLE IF NOT EXISTS users (
+-- 	id INT AUTO_INCREMENT PRIMARY KEY,
+--     first_name VARCHAR(255) NOT NULL,
+--     last_name VARCHAR(255) NOT NULL,
+--     email VARCHAR(255) NOT NULL UNIQUE,
+--     username VARCHAR(255) NOT NULL UNIQUE,
+--     password VARCHAR(255) NOT NULL,
+--     password_changed_at VARCHAR(255),
+--     user_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     password_reset_token VARCHAR(255),
+--     inactive_status BOOLEAN NOT NULL,
+--     role VARCHAR(50) NOT NULL,
+--     INDEX idx_email (email),
+--     INDEX idx_username (username)
+-- )
+
+-- ALTER TABLE users ADD COLUMN password_token_expires TIMESTAMP DEFAULT NULL;
+-- ALTER TABLE users DROP COLUMN IF EXISTS password_token_expires;
+-- ALTER TABLE users ADD COLUMN password_token_expires VARCHAR(255) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN otp VARCHAR(255) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN otp_expires VARCHAR(255) DEFAULT NULL;
+-- ALTER TABLE users ADD COLUMN email_confirmed VARCHAR(255) DEFAULT NULL;
+-- DELETE FROM users WHERE id IN (13);
+-- SHOW CREATE TABLE transactions;
+-- ALTER TABLE transactions DROP FOREIGN KEY fk_transaction_service;
+
+-- ALTER TABLE transactions DROP COLUMN service_id;
+-- DROP TABLE services;
+
+
+
+
+
+-- CREATE TABLE IF NOT EXISTS wallets (
+-- 	id INT AUTO_INCREMENT PRIMARY KEY,
+-- 	user_id INT NOT NULL,
+-- 	balance DECIMAL(12,2) DEFAULT 0.00,
+-- 	last_funded_at TIMESTAMP NULL DEFAULT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- )
+
+-- CREATE TABLE IF NOT EXISTS transactions (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT NOT NULL,
+--     service_id INT DEFAULT NULL,
+--     type ENUM('airtime','data','bill','fund') NOT NULL,
+--     amount DECIMAL(12,2) NOT NULL,
+--     status ENUM('pending','success','failed') DEFAULT 'pending',
+--     reference VARCHAR(50) NOT NULL UNIQUE,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT fk_transaction_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+--     CONSTRAINT fk_transaction_service FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE SET NULL
+-- );
+
+-- CREATE TABLE IF NOT EXISTS services (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(255) NOT NULL,
+--     category ENUM('airtime','data','bill') NOT NULL,
+--     provider_code VARCHAR(255) NOT NULL,
+--     status BOOLEAN DEFAULT TRUE,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+
+-- INSERT INTO services (name, category, provider_code, status) VALUES
+-- -- Airtime providers
+-- ('MTN', 'airtime', 'MTN-AIRTIME', TRUE),
+-- ('Airtel', 'airtime', 'AIRTEL-AIRTIME', TRUE),
+-- ('Glo', 'airtime', 'GLO-AIRTIME', TRUE),
+-- ('9mobile', 'airtime', '9MOBILE-AIRTIME', TRUE),
+-- 
+-- -- Data providers
+-- ('MTN', 'data', 'MTN-DATA', TRUE),
+-- ('Airtel', 'data', 'AIRTEL-DATA', TRUE),
+-- ('Glo', 'data', 'GLO-DATA', TRUE),
+-- ('9mobile', 'data', '9MOBILE-DATA', TRUE),
+-- 
+-- -- Bill payment providers
+-- ('PHCN', 'bill', 'PHCN-BILL', TRUE),
+-- ('DSTV', 'bill', 'DSTV-BILL', TRUE),
+-- ('GOTV', 'bill', 'GOTV-BILL', TRUE),
+-- ('STARTIMES', 'bill', 'STARTIMES-BILL', TRUE),
+-- ('WAEC', 'bill', 'WAEC-BILL', TRUE);
+
