@@ -898,8 +898,8 @@ func SettleExpenseSplitHandler(w http.ResponseWriter, r *http.Request) {
 	isFullyPaid := req.Amount.Equal(split.AmountOwed)
 	if isFullyPaid {
 		_, err = tx.ExecContext(ctx, `
-			UPDATE group_expense_splits SET is_settled = TRUE WHERE id = ?
-		`, split.ID)
+			UPDATE group_expense_splits SET amount_owed = ?, is_settled = TRUE WHERE id = ?
+		`, 0, split.ID)
 		if err != nil {
 			tx.Rollback()
 			utils.Logger.Errorf("error marking split as settled: %v", err)
@@ -952,6 +952,20 @@ func SettleExpenseSplitHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var payerName, receiverEmail, groupName string
+	db.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&payerName)
+	db.QueryRowContext(ctx, "SELECT email FROM users WHERE id = ?", expense.PaidBy).Scan(&receiverEmail)
+	db.QueryRowContext(ctx, `
+		SELECT g.name FROM groups g 
+		JOIN group_expenses e ON g.id = e.group_id 
+		WHERE e.id = ?`, split.ExpenseID).Scan(&groupName)
+
+	go func() {
+		if err := utils.SendPaymentReceivedEmail(receiverEmail, payerName, req.Amount.String(), groupName, split.ID, time.Now()); err != nil {
+			utils.Logger.Errorf("failed to send payment received email to %s: %v", receiverEmail, err)
+		}
+	}()
+
 	message := "split payment recorded"
 	if isFullyPaid {
 		message = "split fully settled"
@@ -965,5 +979,72 @@ func SettleExpenseSplitHandler(w http.ResponseWriter, r *http.Request) {
 			"remaining_owed":   split.AmountOwed.Sub(req.Amount),
 			"is_fully_settled": isFullyPaid,
 		},
+	})
+}
+
+// FUNC TO DELETE EXPENSE AND RELATED EXPENSE SPLITS
+func DeleteExpenseHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		utils.WriteError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	db := sqlconnect.DB
+	if db == nil {
+		utils.WriteError(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	idStr := r.PathValue("expense_id")
+	expenseID, err := strconv.Atoi(idStr)
+	if err != nil {
+		utils.WriteError(w, "invalid group ID", http.StatusBadRequest)
+		return
+	}
+
+	idFloat, ok := r.Context().Value(utils.ContextKey("userId")).(float64)
+	if !ok {
+		utils.WriteError(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userID := int(idFloat)
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	var expense models.GroupExpense
+	err = db.QueryRowContext(ctx, "SELECT id, group_id, paid_by, description, amount FROM group_expenses WHERE id = ?", expenseID).
+		Scan(&expense.ID, &expense.GroupID, &expense.PaidBy, &expense.Description, &expense.Amount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			utils.WriteError(w, "expense not found", http.StatusNotFound)
+			return
+		}
+		utils.WriteError(w, "failed to retrieve expense", http.StatusInternalServerError)
+		return
+	}
+
+	if expense.PaidBy != userID {
+		utils.WriteError(w, "you are not authorized to delete this expense entry", http.StatusUnauthorized)
+		return
+	}
+
+	res, err := db.ExecContext(ctx, "DELETE FROM group_expenses WHERE id = ?", expenseID)
+	if err != nil {
+		utils.Logger.Error("unable to delete")
+		utils.WriteError(w, "error deleting expense", http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		utils.Logger.Errorf("error deleting expense: %v", err)
+		utils.WriteError(w, "expense not found or already deleted", http.StatusNotFound)
+		return
+	}
+
+	utils.WriteJSON(w, map[string]interface{}{
+		"status":  "success",
+		"message": "expense deleted successfully",
 	})
 }

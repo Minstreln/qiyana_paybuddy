@@ -5,20 +5,19 @@ import (
 )
 
 func MainRouter() *http.ServeMux {
-
 	mux := http.NewServeMux()
 
-	uRouter := usersRouter()
-	mux.Handle("/users/", uRouter)
+	apiMux := http.NewServeMux()
 
-	gRouter := groupsRouter()
-	mux.Handle("/groups/", gRouter)
+	apiMux.Handle("/users/", usersRouter())
 
-	wRouter := walletRouter()
-	mux.Handle("/wallet/", wRouter)
+	apiMux.Handle("/groups/", groupsRouter())
 
-	eRouter := groupExpenseRouter()
-	mux.Handle("/group-expense/", eRouter)
+	apiMux.Handle("/wallet/", walletRouter())
+
+	apiMux.Handle("/group-expense/", groupExpenseRouter())
+
+	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", apiMux))
 
 	return mux
 }

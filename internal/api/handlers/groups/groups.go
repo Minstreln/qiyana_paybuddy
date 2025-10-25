@@ -655,11 +655,16 @@ func InviteMembersHandler(w http.ResponseWriter, r *http.Request) {
 	addedInvites := 0
 	skippedInvites := 0
 	var successfulInvites []string
-	var skippedEmails []string
+	var skippedDetails []map[string]string
 
 	for _, inv := range invites {
 		email := strings.TrimSpace(inv.Email)
 		if email == "" {
+			skippedInvites++
+			skippedDetails = append(skippedDetails, map[string]string{
+				"email":  email,
+				"reason": "email is empty or invalid",
+			})
 			continue
 		}
 
@@ -671,7 +676,10 @@ func InviteMembersHandler(w http.ResponseWriter, r *http.Request) {
 		`, groupID, email).Scan(&exists)
 		if err == nil && exists {
 			skippedInvites++
-			skippedEmails = append(skippedEmails, email)
+			skippedDetails = append(skippedDetails, map[string]string{
+				"email":  email,
+				"reason": "user already invited to this group, use the resend invite endpoint",
+			})
 			continue
 		}
 
@@ -684,7 +692,10 @@ func InviteMembersHandler(w http.ResponseWriter, r *http.Request) {
 		`, groupID, email).Scan(&exists)
 		if err == nil && exists {
 			skippedInvites++
-			skippedEmails = append(skippedEmails, email)
+			skippedDetails = append(skippedDetails, map[string]string{
+				"email":  email,
+				"reason": "user is already a group member",
+			})
 			continue
 		}
 
@@ -728,12 +739,12 @@ func InviteMembersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := map[string]interface{}{
-		"status":           "success",
-		"added_invites":    addedInvites,
-		"skipped_invites":  skippedInvites,
-		"successfulEmails": successfulInvites,
-		"skippedEmails":    skippedEmails,
-		"message":          fmt.Sprintf("%d invites sent, %d skipped", addedInvites, skippedInvites),
+		"status":            "success",
+		"added_invites":     addedInvites,
+		"skipped_invites":   skippedInvites,
+		"successful_emails": successfulInvites,
+		"skipped_details":   skippedDetails,
+		"message":           fmt.Sprintf("%d invites sent, %d skipped", addedInvites, skippedInvites),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -795,6 +806,16 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 
 	if groupInvite.Status == "accepted" {
 		utils.WriteError(w, "invitation already accepted", http.StatusBadRequest)
+		return
+	}
+
+	if groupInvite.Status == "expired" {
+		utils.WriteError(w, "invitation already expired", http.StatusBadRequest)
+		return
+	}
+
+	if groupInvite.Status == "revoked" {
+		utils.WriteError(w, "invitation revoked by admin", http.StatusBadRequest)
 		return
 	}
 

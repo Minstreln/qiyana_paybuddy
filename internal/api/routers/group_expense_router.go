@@ -22,5 +22,7 @@ func groupExpenseRouter() *http.ServeMux {
 
 	mux.HandleFunc("/group-expense/{split_id}/settle", groups.SettleExpenseSplitHandler)
 
+	mux.HandleFunc("/group-expense/delete/{expense_id}/expense", groups.DeleteExpenseHandler)
+
 	return mux
 }
