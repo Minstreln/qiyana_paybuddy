@@ -105,19 +105,19 @@ For a complete list of endpoints, refer to the [full API documentation](https://
 
 ## ⚙️ Environment variables
 
+```bash
+
 SERVER_PORT=:3000
 APP_ENV=development
 
-## DATABASE CREDENTIALS
-
+#### DATABASE CREDENTIALS
 DB_USER=root
 DB_PASSWORD=<your_db_password>
 DB_NAME=qiyana_paybuddy
 DB_PORT=3306
 HOST=127.0.0.1
 
-## JWT CREDENTIALS
-
+#### JWT CREDENTIALS
 JWT_SECRET=<your_jwt_secret>
 JWT_EXPIRES_IN=6000s
 
@@ -125,22 +125,29 @@ RESET_TOKEN_EXP_DURATION=10
 OTP_TOKEN_EXP_DURATION=10
 INVITE_TOKEN_EXP_DURATION=3
 
-## SELF SIGNED CERTS
-
+#### SELF SIGNED CERTS
 CERT_FILE="cert.pem"
 KEY_FILE="key.pem"
 
+```
+
 use the below code to generate cert and key files - you can find the openssl.cnf in the root folder
 
+```bash
 # openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem -config openssl.cnf
+
+```
 
 ## PAYSTACK CREDENTIALS
 
+```bash
 PAYSTACK_SECRET_KEY=<your_paystack_secret_key>
 PAYSTACK_PUBLIC_KEY=<your_paystack_public_key>
+```
 
 ## EMAIL CREDENTIALS
 
+```bash
 SMTP_EMAIL=<your_smtp_email>
 SMTP_PASS=<your_smtp_password>
 SMTP_HOST=<smtp_host>
@@ -148,25 +155,31 @@ SMTP_PORT=465
 
 ```
 
-```
-
 ### CREATE DATABASE
+
+```bash
 
 CREATE DATABASE qiyana_paybuddy;
 
 ```
 
-```
+### MIGRATE TABLES
 
-### MIGRATE TABLES IN /internal/migrations
-
-go to the folder and migrate the tables to your mysql database
+```bash
+go to the folder internal/migrations and migrate the tables to your mysql database
 
 ```
 
 ### START SERVER
 
+```bash
+
 go run cmd/api/server.go
+
 ```
 
 For a complete list of endpoints, refer to the [full API documentation](https://www.postman.com/subsum/workspace/qiyana-pay-buddy/collection/27481035-95a3be19-490f-41d7-9306-47523513a7bc?action=share&creator=27481035&active-environment=27481035-6df19659-b8cc-4884-a786-3941fb0771b1).
+
+```
+
+```
