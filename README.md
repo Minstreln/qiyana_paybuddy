@@ -48,16 +48,16 @@ A shared group payment and expense management system built with **Go (Golang)** 
 
 ## 🧠 Technical Highlights
 
-| Component          | Description                                                                  |
-| ------------------ | ---------------------------------------------------------------------------- |
-| **Language**       | Go (Golang)                                                                  |
-| **Database**       | MariaDB                                                                      |
-| **Architecture**   | RESTful API with modular handlers                                            |
-| **Transactions**   | Implemented using `db.BeginTx()` for atomicity                               |
-| **Ledger System**  | Double-entry bookkeeping (every debit has a credit)                          |
-| **Error Handling** | Centralized error management with `utils.WriteError`                         |
-| **Logging**        | Structured logging for better traceability                                   |
-| **Routing**        | Organized modular routes (`/groups`, `/group-expense`, `/wallet`, `/wallet`) |
+| Component          | Description                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------- |
+| **Language**       | Go (Golang)                                                                                  |
+| **Database**       | MariaDB                                                                                      |
+| **Architecture**   | RESTful API with modular handlers                                                            |
+| **Transactions**   | Implemented using `db.BeginTx()` for atomicity                                               |
+| **Ledger System**  | Double-entry bookkeeping (every debit has a credit)                                          |
+| **Error Handling** | Centralized error management with `utils.WriteError`                                         |
+| **Logging**        | Structured logging for better traceability                                                   |
+| **Routing**        | Organized modular routes (`/groups`, `/group-expense`, `/wallet`, `/users`, `/transactions`) |
 
 ---
 
