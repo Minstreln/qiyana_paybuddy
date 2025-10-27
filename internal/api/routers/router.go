@@ -17,6 +17,8 @@ func MainRouter() *http.ServeMux {
 
 	apiMux.Handle("/group-expense/", groupExpenseRouter())
 
+	apiMux.Handle("/transactions/", transactionsRouter())
+
 	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", apiMux))
 
 	return mux

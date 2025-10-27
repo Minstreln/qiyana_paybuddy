@@ -46,7 +46,7 @@ func main() {
 		CheckQuery:                  true,
 		CheckBody:                   true,
 		CheckBodyOnlyForContentType: "application/x-www-form-urlencoded",
-		Whitelist:                   []string{"sortBy", "sortOrder", "name", "age", "class"},
+		Whitelist:                   []string{"sortBy", "limit", "page", "sortOrder", "name", "description", "total_expense", "amount", "transaction_type", "category", "amount", "status"},
 	}
 
 	router := routers.MainRouter()
